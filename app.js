@@ -5,7 +5,6 @@ const passport = require("passport");
 const { PrismaClient } = require('./generated/prisma');
 const path = require("node:path");
 
-
 const indexRouter = require("./routes/index");
 require('./config/passport');
 

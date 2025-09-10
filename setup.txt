@@ -1,14 +1,12 @@
-express, passport, ejs, prisma
+base multimedia mvc api stack 
+express, passport, ejs, multer, jwt, cors prisma
 
-npm install express express-session pg passport passport-local ejs install prisma --save-dev
+npm install express express-session passport passport-local ejs multer @prisma/client jsonwebtoken cors passport-jwt
+
+npm install prisma --save-dev
 
 npx prisma init --datasource-provider postgresql --output ../generated/prisma
 
-prisma migrate dev --name init 
+npx prisma migrate dev --name init 
 (change init to appropriate commit type name for succeeding migrations)
 
-npm install @prisma/client
-
-npm install multer
-
-npm install jsonwebtoken
