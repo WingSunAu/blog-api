@@ -13,3 +13,34 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
+model Comment {
+  id       Int      @id @default(autoincrement())
+  author   User     @relation(fields: [authorId], references: [id])
+  authorId Int
+  post     Post     @relation(fields: [postId], references: [id])
+  postId   Int
+  un       String
+  date     DateTime
+  text     String
+}
+
+model Post {
+  id         Int       @id @default(autoincrement())
+  author     User      @relation(fields: [authorId], references: [id])
+  authorId   Int
+  un         String
+  date       DateTime
+  title      String
+  text       String
+  visibility String
+  comments   Comment[]
+}
+
+model User {
+  id       Int       @id @default(autoincrement())
+  un       String    @unique
+  pw       String
+  posts    Post[]
+  comments Comment[]
+}
