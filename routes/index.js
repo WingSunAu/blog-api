@@ -1,17 +1,19 @@
 const { Router } = require("express");
 const passport = require("passport");
-const multer = require('multer')
-const upload = multer({ dest: 'uploads/' })
+const postRouter = require("./posts");
+const { getIndex } = require("../controllers");
+const { createUser } = require("../controllers/users");
 
 const router = Router();
 
-router.get("/", (req, res) => indexGet(req, res));
+router.use("/posts", postRouter);
+router.get("/", (req, res) => { getIndex(req, res) });
 
-router.get("/sign-up", (req, res) => createUserGet(req, res));
-router.post("/sign-up", async (req, res, next) => createUserPost(req, res, next));
+// authentication routes
 
-router.get("/log-in", (req, res) => readUserGet(req, res));
-router.post("/log-in", passport.authenticate('local', { successRedirect: "/", failureRedirect: "/sign-up" }));
+router.post("/user", async (req, res, next) => { postUser(req, res, next) });
+
+router.post("/user", passport.authenticate('local', { successRedirect: "/", failureRedirect: "/sign-up" }));
 
 router.get("/log-out", (req, res, next) => {
     req.logout((err) => {
@@ -21,4 +23,5 @@ router.get("/log-out", (req, res, next) => {
         res.redirect("/");
     });
 });
+
 module.exports = router;

@@ -1,7 +1,7 @@
 base multimedia mvc api stack 
 express, passport, ejs, multer, jwt, cors prisma
 
-npm install express express-session passport passport-local ejs multer @prisma/client jsonwebtoken cors passport-jwt
+npm install express express-session passport passport-local ejs multer @prisma/client jsonwebtoken cors passport-jwt bcryptjs
 
 npm install prisma --save-dev
 
