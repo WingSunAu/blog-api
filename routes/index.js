@@ -1,24 +1,18 @@
 const { Router } = require("express");
 const passport = require("passport");
-const multer = require('multer')
-const upload = multer({ dest: 'uploads/' })
+const postRouter = require("./posts");
+const authRouter = require('./auth');
+const viewRouter = require("./view");
+const { getIndex } = require("../controllers");
+const { postUser } = require("../controllers/users");
+const { verifyToken } = require("../config/jwt");
+
 
 const router = Router();
 
-router.get("/", (req, res) => indexGet(req, res));
-
-router.get("/sign-up", (req, res) => createUserGet(req, res));
-router.post("/sign-up", async (req, res, next) => createUserPost(req, res, next));
-
-router.get("/log-in", (req, res) => readUserGet(req, res));
-router.post("/log-in", passport.authenticate('local', { successRedirect: "/", failureRedirect: "/sign-up" }));
-
-router.get("/log-out", (req, res, next) => {
-    req.logout((err) => {
-        if (err) {
-            return next(err);
-        }
-        res.redirect("/");
-    });
-});
+router.use('/posts', passport.authenticate('jwt', { session: false }), verifyToken, postRouter);
+router.use('/posts', viewRouter);
+router.use('/auth', authRouter);
+router.get("/", (req, res) => { getIndex(req, res) });
+router.post("/user", async (req, res, next) => { postUser(req, res, next) });
 module.exports = router;
