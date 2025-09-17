@@ -1,7 +1,7 @@
 base multimedia mvc api stack 
 express, passport, ejs, multer, jwt, cors prisma
 
-npm install express express-session passport passport-local ejs multer @prisma/client jsonwebtoken cors passport-jwt bcryptjs
+npm install express express-session passport passport-local ejs multer @prisma/client jsonwebtoken cors passport-jwt bcryptjs @quixo3/prisma-session-store
 
 npm install prisma --save-dev
 
@@ -10,3 +10,5 @@ npx prisma init --datasource-provider postgresql --output ../generated/prisma
 npx prisma migrate dev --name init 
 (change init to appropriate commit type name for succeeding migrations)
 
+
+Security: jwt strategy to check token against model data, verifytoken to parse token to request body, function body converts token to 
