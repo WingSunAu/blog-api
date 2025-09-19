@@ -1,5 +1,5 @@
+const { parseToken } = require('../config/jwt');
 const { PrismaClient } = require('../generated/prisma');
-const jwt = require("jsonwebtoken");
 
 const prisma = new PrismaClient();
 
@@ -8,19 +8,22 @@ async function getPosts(req, res) {
     res.json(posts);
 }
 
+async function getPostsByUser(req, res) {
+    const { authorId } = req.params;
+    const posts = await prisma.post.findMany({ where: { authorId: authorId } });
+    res.json(posts);
+}
+
+
 async function getPost(req, res) {
-    const post = await prisma.post.findUnique({ where: { id: req.user.id } });
+    const { postid } = req.params;
+    const post = await prisma.post.findUnique({ where: { id: parseInt(postid) } });
     res.json(post);
 }
+
 async function postPost(req, res, next) {
     try {
-        const token = jwt.verify(req.token, "cats", (err, authData) => {
-            if (err) {
-                res.sendStatus(403);
-            } else {
-                return authData;
-            }
-        });
+        const token = parseToken(req);
         const userPostsUpdate = await prisma.user.update({
             where: { id: token.id },
             data: {
@@ -44,20 +47,19 @@ async function postPost(req, res, next) {
     }
 }
 // verify jwt, check jwt id against post id
-async function putPost(req, res) {
+async function putPost(req, res, next) {
     try {
-        const token = jwt.verify(req.token, "cats", (err, authData) => {
-            if (err) {
-                res.sendStatus(403);
-            } else {
-                return authData;
-            }
-        });
+        const { postid } = req.params;
+        const token = parseToken(req);
         const postUpdate = await prisma.post.update({
-            where: { id: req.body.id },
+            where: {
+                id: parseInt(postid),
+                AND: [
+                    { authorId: token.id }
+                ],
+            },
             data: {
                 un: token.un,
-                date: req.body.date,
                 title: req.body.title,
                 text: req.body.text,
                 visibility: req.body.visibility,
@@ -69,14 +71,21 @@ async function putPost(req, res) {
     }
 }
 
-async function deletePost(req, res) {
+async function deletePost(req, res, next) {
     try {
+        const { postid } = req.params;
+        const token = parseToken(req);
         const postDelete = await prisma.post.delete({
-            where: { id: req.body.id },
+            where: {
+                id: parseInt(postid),
+                AND: [
+                    { authorId: token.id }
+                ],
+            },
         })
         res.json(postDelete);
     } catch (err) {
         return next(err);
     }
 }
-module.exports = { getPosts, getPost, postPost, putPost, deletePost };
+module.exports = { getPosts, getPostsByUser, getPost, postPost, putPost, deletePost };

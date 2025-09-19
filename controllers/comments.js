@@ -1,42 +1,67 @@
+const { parseToken } = require('../config/jwt');
 const { PrismaClient } = require('../generated/prisma');
 
 const prisma = new PrismaClient();
 
 async function getComments(req, res) {
-    comments = await prisma.comment.findMany();
-    res.json(req.comments);
+    const comments = await prisma.comment.findMany();
+    res.json(comments);
+}
+
+async function getCommentsByUser(req, res) {
+    const { authorId } = req.params;
+    const comments = await prisma.comment.findMany({ where: { authorId: authorId } });
+    res.json(comments);
 }
 
 async function getComment(req, res) {
-    comment = await prisma.comment.findUnique({ where: { id: req.user.id } });
+    const { commentid } = req.params;
+    const comment = await prisma.comment.findUnique({ where: { id: parseInt(commentid) } });
     res.json(comment);
 }
 
-// create comment and connect to post and user
-async function postComment(req, res) {
+async function postComment(req, res, next) {
     try {
-        const commentCreate = await prisma.comment.create({
-            data: {
-                post: req.body.post,
-                author: req.user,
-                un: req.user.un,
-                date: req.body.date,
-                text: req.body.text,
+        const token = parseToken(req);
+        const user = await prisma.user.findUnique({ where: { id: token.id } });
+        const { postid } = req.params;
+        const postUpdate = await prisma.post.update({
+            where: {
+                id: parseInt(postid)
             },
-        });
-        res.json(commentCreate);
+            data: {
+                comments: {
+                    create: {
+                        author: { connect: user },
+                        un: token.un,
+                        date: new Date().toISOString(),
+                        text: req.body.text,
+                    },
+                },
+            },
+            include: {
+                comments: true,
+            },
+        })
+        res.json(postUpdate);
     } catch (err) {
         return next(err);
     }
 }
 
-async function putComment(req, res) {
+async function putComment(req, res, next) {
     try {
+        const { commentid } = req.params;
+        const token = parseToken(req);
         const commentUpdate = await prisma.comment.update({
-            where: { id: req.body.id },
+            where: {
+                id: parseInt(commentid),
+                AND: [
+                    { authorId: token.id }
+                ],
+            },
             data: {
-                un: req.user.un,
-                date: req.body.date,
+                un: token.un,
                 text: req.body.text,
             },
         })
@@ -46,10 +71,17 @@ async function putComment(req, res) {
     }
 }
 
-async function deleteComment(req, res) {
+async function deleteComment(req, res, next) {
     try {
+        const { commentid } = req.params;
+        const token = parseToken(req);
         const commentDelete = await prisma.comment.delete({
-            where: { id: req.body.id },
+            where: {
+                id: parseInt(commentid),
+                AND: [
+                    { authorId: token.id }
+                ],
+            },
         })
         res.json(commentDelete);
     } catch (err) {
@@ -57,4 +89,4 @@ async function deleteComment(req, res) {
     }
 }
 
-module.exports = { getComments, getComment, postComment, putComment, deleteComment };
+module.exports = { getComments, getCommentsByUser, getComment, postComment, putComment, deleteComment };

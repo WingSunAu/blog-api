@@ -1,3 +1,5 @@
+const jwt = require("jsonwebtoken");
+
 function verifyToken(req, res, next) {
     const bearerHeader = req.headers["authorization"];
     if (typeof bearerHeader !== 'undefined') {
@@ -9,4 +11,14 @@ function verifyToken(req, res, next) {
     }
 }
 
-module.exports = { verifyToken }
+function parseToken(req) {
+    return jwt.verify(req.token, "cats", (err, authData) => {
+        if (err) {
+            res.sendStatus(403);
+        } else {
+            return authData;
+        }
+    });
+}
+
+module.exports = { verifyToken, parseToken }
