@@ -34,38 +34,28 @@ const strategy = new LocalStrategy(customFields, verifyCallback);
 
 passport.use(strategy);
 
-passport.use(new JWTStrategy({
+const jwtOps = {
     jwtFromRequest: ExtractJWT.fromAuthHeaderAsBearerToken(),
     secretOrKey: 'cats'
-},
-    async function (jwtPayload, done) {
+}
 
-        //find the user in db if needed. This functionality may be omitted if you store everything you'll need in JWT payload.
-        return await prisma.user.findUnique({ where: { id: jwtPayload.id } })
-            .then(user => {
-                return done(null, user);
-            })
-            .catch(err => {
-                return done(err);
-            });
-    }
-));
+const jwtVerifyCallback = async (jwtPayload, done) => {
+    try {
+        const rows = await prisma.user.findUnique({ where: { id: jwtPayload.id } });
+        const user = rows;
+        if (!user) {
+            return done(null, false, { message: "Invalid JWT" });
+        }
+        if (jwtPayload.pw == user.pw) {
+            return done(null, user);
+        } else {
+            console.log("incorrect password in JWT");
+            return done(null, false, { message: "JWT password does not match user password" })
+        }
+    } catch (err) {
+        return done(err);
+    };
+}
+const jwtStrategy = new JWTStrategy(jwtOps, jwtVerifyCallback);
 
-// express session stuff below
-
-// // put userid into session
-// passport.serializeUser((user, done) => {
-//     done(null, user.id);
-// });
-
-// // grab userid from session and find in database to take out of session
-// passport.deserializeUser(async (id, done) => {
-//     try {
-//         const rows = await prisma.user.findUnique({ where: { id: id } });
-//         const user = rows;
-
-//         done(null, user);
-//     } catch (err) {
-//         done(err);
-//     }
-// });
+passport.use(jwtStrategy);

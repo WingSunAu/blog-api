@@ -6,13 +6,15 @@ const viewRouter = require("./view");
 const { getIndex } = require("../controllers");
 const { postUser } = require("../controllers/users");
 const { verifyToken } = require("../config/jwt");
+const userViewRouter = require("./userView");
 
 
 const router = Router();
-
-router.use('/posts', passport.authenticate('jwt', { session: false }), verifyToken, postRouter);
+router.use('/users', userViewRouter);
 router.use('/posts', viewRouter);
+router.use('/posts', passport.authenticate('jwt', { session: false }), verifyToken, postRouter);
 router.use('/auth', authRouter);
-router.get("/", (req, res) => { getIndex(req, res) });
 router.post("/user", async (req, res, next) => { postUser(req, res, next) });
+router.get("/", (req, res) => { getIndex(req, res) });
+
 module.exports = router;
