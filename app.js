@@ -5,13 +5,7 @@ const indexRouter = require("./routes/index");
 require('./config/passport');
 
 const app = express();
-const corsOptions = {
-    origin: [
-        'https://endearing-cocada-ac8733.netlify.app/',
-        'https://famous-moxie-b58c35.netlify.app/'
-    ],
-}
-app.use(cors(corsOptions));
+app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use('/', indexRouter);
