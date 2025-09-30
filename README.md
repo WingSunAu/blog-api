@@ -1,4 +1,4 @@
-# members-chat <img src="https://img.shields.io/badge/build-passing-green"> <img src="https://img.shields.io/badge/status-offline-red">
+# blog-api <img src="https://img.shields.io/badge/build-passing-green"> <img src="https://img.shields.io/badge/status-offline-red">
 
 Multi User Blog Api 
 
